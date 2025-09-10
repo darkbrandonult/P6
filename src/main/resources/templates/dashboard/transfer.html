@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transférer de l'argent - PayMyBuddy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <strong>PayMyBuddy</strong>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">Tableau de bord</a>
+                <a class="nav-link" href="/transactions">Transactions</a>
+                <a class="nav-link" href="/friends">Amis</a>
+                <a class="nav-link" href="/profile">Profil</a>
+                <form class="d-inline" th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-link nav-link text-light border-0">Déconnexion</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Navigation</h5>
+                        <nav class="nav flex-column">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="bi bi-house"></i> Accueil
+                            </a>
+                            <a class="nav-link active" href="/transfer">
+                                <i class="bi bi-arrow-left-right"></i> Transférer
+                            </a>
+                            <a class="nav-link" href="/friends">
+                                <i class="bi bi-people"></i> Mes amis
+                            </a>
+                            <a class="nav-link" href="/transactions">
+                                <i class="bi bi-list-ul"></i> Historique
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Solde actuel -->
+                <div class="card mt-3">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-primary">Votre solde</h5>
+                        <h2 class="text-success" th:text="'€' + ${user.balance}">€ 0.00</h2>
+                        <small class="text-muted">Disponible pour transfert</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="col-md-9">
+                <!-- En-tête -->
+                <div class="row mb-4">
+                    <div class="col">
+                        <h1 class="h3">Transférer de l'argent</h1>
+                        <p class="text-muted">Envoyez de l'argent à vos amis facilement et en toute sécurité</p>
+                    </div>
+                </div>
+
+                <!-- Messages d'erreur et de succès -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Formulaire de transfert -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Nouveau transfert</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/send-money}" method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    
+                                    <!-- Sélection du destinataire -->
+                                    <div class="mb-3">
+                                        <label for="receiverId" class="form-label">Destinataire *</label>
+                                        <select class="form-select" id="receiverId" name="receiverId" required>
+                                            <option value="">Choisissez un ami...</option>
+                                            <option th:each="friend : ${friends}" 
+                                                    th:value="${friend.id}" 
+                                                    th:text="${friend.fullName + ' (' + friend.email + ')'}">
+                                                Nom de l'ami (email@example.com)
+                                            </option>
+                                        </select>
+                                        <div class="form-text">
+                                            Vous ne pouvez envoyer de l'argent qu'à vos amis. 
+                                            <a href="/friends">Ajouter un ami</a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Montant -->
+                                    <div class="mb-3">
+                                        <label for="amount" class="form-label">Montant (€) *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" 
+                                                   class="form-control" 
+                                                   id="amount" 
+                                                   name="amount" 
+                                                   step="0.01" 
+                                                   min="0.01" 
+                                                   max="10000"
+                                                   th:max="${user.balance}"
+                                                   required
+                                                   placeholder="0.00">
+                                        </div>
+                                        <div class="form-text">
+                                            Montant maximum: <span th:text="'€' + ${user.balance}">€ 0.00</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description *</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="description" 
+                                               name="description" 
+                                               maxlength="100"
+                                               required
+                                               placeholder="Ex: Remboursement restaurant, Cadeau anniversaire...">
+                                        <div class="form-text">Décrivez brièvement la raison du transfert</div>
+                                    </div>
+
+                                    <!-- Boutons -->
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-send"></i> Envoyer
+                                        </button>
+                                        <a href="/dashboard" class="btn btn-outline-secondary">Annuler</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations sur les transferts -->
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Informations importantes</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="small">
+                                    <div class="mb-2">
+                                        <i class="bi bi-shield-check text-success"></i>
+                                        <strong>Sécurisé:</strong> Tous les transferts sont cryptés
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="bi bi-clock text-info"></i>
+                                        <strong>Instantané:</strong> L'argent arrive immédiatement
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="bi bi-receipt text-warning"></i>
+                                        <strong>Traçable:</strong> Consultez l'historique dans vos transactions
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="bi bi-exclamation-triangle text-danger"></i>
+                                        <strong>Attention:</strong> Les transferts ne peuvent pas être annulés
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vos amis -->
+                        <div class="card mt-3" th:if="${!friends.isEmpty()}">
+                            <div class="card-header">
+                                <h6 class="mb-0">Vos amis</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group list-group-flush">
+                                    <div th:each="friend : ${friends}" class="list-group-item d-flex align-items-center px-0 py-2">
+                                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                             style="width: 32px; height: 32px; font-size: 12px;">
+                                            <span th:text="${friend.firstName.substring(0,1) + friend.lastName.substring(0,1)}">AB</span>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold small" th:text="${friend.fullName}">Nom de l'ami</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;" th:text="${friend.email}">email@example.com</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message si pas d'amis -->
+                        <div class="card mt-3" th:if="${friends.isEmpty()}">
+                            <div class="card-body text-center">
+                                <i class="bi bi-people text-muted" style="font-size: 2rem;"></i>
+                                <p class="text-muted mt-2 mb-2">Vous n'avez pas encore d'amis</p>
+                                <a href="/friends" class="btn btn-sm btn-outline-primary">Ajouter des amis</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

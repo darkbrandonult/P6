@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - PayMyBuddy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">PayMyBuddy</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">Tableau de bord</a>
+                <a class="nav-link" href="/transactions">Transactions</a>
+                <a class="nav-link" href="/friends">Amis</a>
+                <a class="nav-link active" href="/profile">Profil</a>
+                <form class="d-inline" th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-link nav-link text-light border-0">Déconnexion</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Messages Flash -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <!-- Informations actuelles -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Mes informations</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div class="avatar bg-primary text-white rounded-circle mx-auto d-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px; font-size: 32px;">
+                                <span th:text="${#strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1)}"></span>
+                            </div>
+                        </div>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Prénom:</strong></td>
+                                <td th:text="${user.firstName}"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Nom:</strong></td>
+                                <td th:text="${user.lastName}"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td th:text="${user.email}"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Solde:</strong></td>
+                                <td class="text-success fw-bold" th:text="${user.balance + '€'}"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Membre depuis:</strong></td>
+                                <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modifier le profil -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Modifier mon profil</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/update-profile}" method="post">
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">Prénom</label>
+                                <input type="text" class="form-control" id="firstName" name="firstName" 
+                                       th:value="${user.firstName}" required minlength="2" maxlength="50">
+                            </div>
+                            <div class="mb-3">
+                                <label for="lastName" class="form-label">Nom</label>
+                                <input type="text" class="form-control" id="lastName" name="lastName" 
+                                       th:value="${user.lastName}" required minlength="2" maxlength="50">
+                            </div>
+                            <div class="mb-3">
+                                <label for="currentEmail" class="form-label">Email (non modifiable)</label>
+                                <input type="email" class="form-control" id="currentEmail" 
+                                       th:value="${user.email}" readonly disabled>
+                                <div class="form-text">L'adresse email ne peut pas être modifiée.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Section Ajouter de l'argent -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5>Ajouter de l'argent</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">Créditez votre compte PayMyBuddy pour effectuer des transferts.</p>
+                        <form th:action="@{/add-money}" method="post">
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Montant (€)</label>
+                                <input type="number" class="form-control" id="amount" name="amount" 
+                                       step="0.01" min="0.01" max="9999.99" placeholder="Ex: 50.00" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">Ajouter au compte</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Statistiques du compte</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h4 class="text-primary" th:text="${user.balance + '€'}"></h4>
+                                        <p class="card-text text-muted">Solde actuel</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h4 class="text-success">0</h4>
+                                        <p class="card-text text-muted">Transactions ce mois</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h4 class="text-info">0</h4>
+                                        <p class="card-text text-muted">Amis connectés</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h4 class="text-warning" th:text="${#temporals.format(user.createdAt, 'MM/yyyy')}"></h4>
+                                        <p class="card-text text-muted">Membre depuis</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

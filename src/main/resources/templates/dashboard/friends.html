@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amis - PayMyBuddy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">PayMyBuddy</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">Tableau de bord</a>
+                <a class="nav-link" href="/transactions">Transactions</a>
+                <a class="nav-link active" href="/friends">Amis</a>
+                <a class="nav-link" href="/profile">Profil</a>
+                <form class="d-inline" th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-link nav-link text-light border-0">Déconnexion</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Messages Flash -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <!-- Section Ajouter un ami -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Ajouter un ami</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/add-friend}" method="post">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email de votre ami</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       placeholder="example@email.com" required>
+                                <div class="form-text">Entrez l'email de la personne que vous souhaitez ajouter.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Ajouter</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations utilisateur -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Mes informations</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Nom:</strong> <span th:text="${user.firstName + ' ' + user.lastName}"></span></p>
+                        <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+                        <p><strong>Nombre d'amis:</strong> <span th:text="${#lists.size(friends)}"></span></p>
+                        <p><strong>Solde:</strong> <span class="text-success fw-bold" th:text="${user.balance + '€'}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des amis -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Mes amis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(friends)}" class="text-center text-muted">
+                            <div class="py-5">
+                                <i class="bi bi-people fs-1"></i>
+                                <h6 class="mt-3">Aucun ami pour le moment</h6>
+                                <p>Ajoutez des amis en utilisant leur adresse email ci-dessus.</p>
+                            </div>
+                        </div>
+                        <div th:if="${!#lists.isEmpty(friends)}">
+                            <div class="row">
+                                <div th:each="friend : ${friends}" class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <div class="avatar bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                                 style="width: 60px; height: 60px; font-size: 24px;">
+                                                <span th:text="${#strings.substring(friend.firstName, 0, 1) + #strings.substring(friend.lastName, 0, 1)}"></span>
+                                            </div>
+                                            <h6 class="card-title" th:text="${friend.firstName + ' ' + friend.lastName}"></h6>
+                                            <p class="card-text text-muted small" th:text="${friend.email}"></p>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/transactions(friendId=${friend.id})}" class="btn btn-sm btn-outline-primary">
+                                                    Envoyer
+                                                </a>
+                                                <a th:href="@{/transactions(friendId=${friend.id})}" class="btn btn-sm btn-outline-secondary">
+                                                    Historique
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

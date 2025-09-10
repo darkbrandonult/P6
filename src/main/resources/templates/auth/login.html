@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - PayMyBuddy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <h1 class="h3 text-primary">PayMyBuddy</h1>
+                            <p class="text-muted">Connectez-vous à votre compte</p>
+                        </div>
+
+                        <!-- Messages d'erreur et de succès -->
+                        <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                            <strong>Erreur :</strong> Email ou mot de passe incorrect.
+                        </div>
+                        
+                        <div th:if="${param.logout}" class="alert alert-success" role="alert">
+                            Vous avez été déconnecté avec succès.
+                        </div>
+
+                        <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+
+                        <!-- Formulaire de connexion -->
+                        <form th:action="@{/perform-login}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Adresse email</label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="email" 
+                                       name="email" 
+                                       required 
+                                       aria-describedby="emailHelp"
+                                       placeholder="votre@email.com">
+                                <div id="emailHelp" class="form-text">
+                                    Utilisez l'email avec lequel vous vous êtes inscrit.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Mot de passe</label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       required
+                                       aria-describedby="passwordHelp"
+                                       placeholder="Votre mot de passe">
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    Se connecter
+                                </button>
+                            </div>
+                        </form>
+
+                        <hr>
+
+                        <div class="text-center">
+                            <p class="mb-0">
+                                Pas encore de compte ? 
+                                <a th:href="@{/register}" class="text-decoration-none">
+                                    Inscrivez-vous gratuitement
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a th:href="@{/}" class="text-muted text-decoration-none">
+                        ← Retour à l'accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
