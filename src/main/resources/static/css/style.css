@@ -20,6 +20,10 @@ body {
 .navbar-brand {
     font-weight: 700;
     font-size: 1.5rem;
+    background-color: #ffc107;
+    color: #212529 !important;
+    padding: 4px 12px;
+    border-radius: 4px;
 }
 
 /* Hero Section */
