@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord - PayMyBuddy</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" aria-label="Navigation principale">
         <div class="container">
             <a class="navbar-brand" href="/dashboard">
                 <strong>PayMyBuddy</strong>
@@ -27,7 +28,7 @@
     </nav>
 
     <!-- Contenu principal -->
-    <div class="container mt-4">
+    <main class="container mt-4">
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-3">
@@ -68,7 +69,7 @@
                         <div class="card text-center">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Solde actuel</h5>
-                                <h2 class="text-success">€ 0.00</h2>
+                                <h2 class="text-success" th:text="'€ ' + ${user.balance}">€ 0.00</h2>
                                 <small class="text-muted">Disponible pour transfert</small>
                             </div>
                         </div>
@@ -77,7 +78,7 @@
                         <div class="card text-center">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Amis connectés</h5>
-                                <h2 class="text-info">0</h2>
+                                <h2 class="text-info" th:text="${#lists.size(friends)}">0</h2>
                                 <small class="text-muted">Personnes dans votre réseau</small>
                             </div>
                         </div>
@@ -86,7 +87,7 @@
                         <div class="card text-center">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Transactions ce mois</h5>
-                                <h2 class="text-warning">0</h2>
+                                <h2 class="text-warning" th:text="${#lists.size(recentTransactions)}">0</h2>
                                 <small class="text-muted">Transferts effectués</small>
                             </div>
                         </div>
@@ -128,29 +129,34 @@
                             </div>
                             <div class="card-body">
                                 <!-- Message si aucune transaction -->
-                                <div class="text-center py-4">
+                                <div th:if="${#lists.isEmpty(recentTransactions)}" class="text-center py-4">
                                     <div class="text-muted">
-                                        <i class="bi bi-receipt" style="font-size: 3rem;"></i>
+                                        <i class="bi bi-receipt" style="font-size: 3rem;" aria-hidden="true"></i>
                                         <p class="mt-2">Aucune transaction pour le moment</p>
                                         <a href="/transfer" class="btn btn-primary">
                                             Effectuer votre premier transfert
                                         </a>
                                     </div>
                                 </div>
-                                
-                                <!-- Table des transactions (sera remplie dynamiquement) -->
-                                <div class="table-responsive d-none" id="transactions-table">
-                                    <table class="table table-hover">
+
+                                <!-- Table des transactions -->
+                                <div th:if="${!#lists.isEmpty(recentTransactions)}" class="table-responsive">
+                                    <table class="table table-hover" aria-label="Dernières transactions">
                                         <thead>
                                             <tr>
-                                                <th>Date</th>
-                                                <th>Contact</th>
-                                                <th>Description</th>
-                                                <th>Montant</th>
+                                                <th scope="col">Date</th>
+                                                <th scope="col">Contact</th>
+                                                <th scope="col">Description</th>
+                                                <th scope="col">Montant</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <!-- Les transactions seront ajoutées ici -->
+                                            <tr th:each="tx : ${recentTransactions}">
+                                                <td th:text="${#temporals.format(tx.transactionDate, 'dd/MM/yyyy')}">01/01/2024</td>
+                                                <td th:text="${tx.receiver.firstName + ' ' + tx.receiver.lastName}">Nom</td>
+                                                <td th:text="${tx.description}">Description</td>
+                                                <td class="text-danger fw-bold" th:text="'-€' + ${tx.amount}">-€0.00</td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -160,9 +166,8 @@
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"></script>
 </body>
 </html>
